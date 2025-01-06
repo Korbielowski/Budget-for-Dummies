@@ -1,5 +1,6 @@
 from editincome import EditIncome
 from editspending import EditSpending
+from change_screen import change_screen
 
 from matplotlib import pyplot as plt
 
@@ -22,60 +23,62 @@ from kivymd.uix.bottomnavigation import MDBottomNavigation, MDBottomNavigationIt
 
 class MainScreen(MDScreen):
     def on_pre_enter(self):
-        self.navigation = MDBottomNavigation(
+        navigation = MDBottomNavigation(
             selected_color_background="orange", text_color_active="lightgrey"
         )
-        self.navigation_item_home = MDBottomNavigationItem(
+        navigation_item_home = MDBottomNavigationItem(
             name="home", text="home", icon="home"
         )
-        self.navigation_item_stats = MDBottomNavigationItem(
+        navigation_item_stats = MDBottomNavigationItem(
             name="stats", text="stats", icon="chart-bar", on_enter=self.load_chart
         )
-        self.navigation_item_more = MDBottomNavigationItem(
+        navigation_item_more = MDBottomNavigationItem(
             name="more",
             text="more",
             icon="dots-horizontal",
         )
 
-        self.ids["stats"] = self.navigation_item_stats
-        self.ids["home"] = self.navigation_item_home
-        self.ids["more"] = self.navigation_item_more
+        self.ids["stats"] = navigation_item_stats
+        self.ids["home"] = navigation_item_home
+        self.ids["more"] = navigation_item_more
 
-        self.navigation.add_widget(self.navigation_item_home)
-        self.navigation.add_widget(self.navigation_item_stats)
-        self.navigation.add_widget(self.navigation_item_more)
+        navigation.add_widget(navigation_item_home)
+        navigation.add_widget(navigation_item_stats)
+        navigation.add_widget(navigation_item_more)
 
-        self.scroll_home = ScrollView(
+        scroll_home = ScrollView(
             size_hint=(1, None),
             size=(Window.width, Window.height - Window.height * 0.12),
         )
 
-        self.scroll_stats = ScrollView(
+        scroll_stats = ScrollView(
             size_hint=(1, None),
             size=(Window.width, Window.height - Window.height * 0.12),
         )
 
-        self.card_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
-        self.card_grid.bind(minimum_height=self.card_grid.setter("height"))
-        self.ids["card_layout"] = self.card_grid
+        card_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
+        card_grid.bind(minimum_height=card_grid.setter("height"))
+        self.ids["card_layout"] = card_grid
 
-        self.stats_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
+        stats_grid = GridLayout(cols=1, spacing=5, size_hint_y=None)
 
-        self.stats_grid.bind(minimum_height=self.stats_grid.setter("height"))
-        self.ids["stats_layout"] = self.stats_grid
+        stats_grid.bind(minimum_height=stats_grid.setter("height"))
+        self.ids["stats_layout"] = stats_grid
 
-        self.more_grid = StackLayout()
-        self.ids["more_layout"] = self.more_grid
+        more_grid = StackLayout()
+        self.ids["more_layout"] = more_grid
 
-        self.add_button = MDFloatingActionButton(
+        add_button = MDFloatingActionButton(
             icon="plus",
             icon_color="grey",
             md_bg_color="white",
             pos_hint={"center_x": 0.915, "center_y": 0.06},
         )
-        self.add_button.bind(on_release=self.change_screen_to_second)
+        add_button.bind(
+            on_release=lambda obj: change_screen(obj=obj, screen_name="second")
+        )
 
-        self.settings_button = MDRectangleFlatIconButton(
+        settings_button = MDRectangleFlatIconButton(
             text="Settings",
             icon="cog",
             size_hint=(0.3333, 0.3333),
@@ -83,9 +86,11 @@ class MainScreen(MDScreen):
             line_color="grey",
             text_color="grey",
             icon_color="grey",
-            on_release=self.change_screen_to_settings_screen,
+            on_release=lambda obj: change_screen(
+                obj=obj, screen_name="settings_screen"
+            ),
         )
-        self.info_button = MDRectangleFlatIconButton(
+        info_button = MDRectangleFlatIconButton(
             text="Info",
             icon="information",
             size_hint=(0.3333, 0.3333),
@@ -93,9 +98,9 @@ class MainScreen(MDScreen):
             line_color="grey",
             text_color="grey",
             icon_color="grey",
-            on_release=self.change_screen_to_info_screen,
+            on_release=lambda obj: change_screen(obj=obj, screen_name="info_screen"),
         )
-        self.app_theme_button = MDRectangleFlatIconButton(
+        app_theme_button = MDRectangleFlatIconButton(
             text="App theme",
             icon="palette",
             size_hint=(0.3333, 0.3333),
@@ -103,23 +108,25 @@ class MainScreen(MDScreen):
             line_color="grey",
             text_color="grey",
             icon_color="grey",
-            on_release=self.change_screen_to_app_theme_screen,
+            on_release=lambda obj: change_screen(
+                obj=obj, screen_name="app_theme_screen"
+            ),
         )
 
-        self.more_grid.add_widget(self.settings_button)
-        self.more_grid.add_widget(self.info_button)
-        self.more_grid.add_widget(self.app_theme_button)
+        more_grid.add_widget(settings_button)
+        more_grid.add_widget(info_button)
+        more_grid.add_widget(app_theme_button)
 
-        self.scroll_home.add_widget(self.card_grid)
-        self.ids.home.add_widget(self.scroll_home)
-        self.ids.home.add_widget(self.add_button)
+        scroll_home.add_widget(card_grid)
+        self.ids.home.add_widget(scroll_home)
+        self.ids.home.add_widget(add_button)
 
-        self.scroll_stats.add_widget(self.stats_grid)
-        self.ids.stats.add_widget(self.scroll_stats)
+        scroll_stats.add_widget(stats_grid)
+        self.ids.stats.add_widget(scroll_stats)
 
-        self.ids.more.add_widget(self.more_grid)
+        self.ids.more.add_widget(more_grid)
 
-        self.add_widget(self.navigation)
+        self.add_widget(navigation)
 
         self.load_income_spending()
         self.load_chart()
@@ -152,7 +159,9 @@ class MainScreen(MDScreen):
                                 icon="pencil",
                                 text="Edit",
                                 pos_hint={"top": 0.75, "right": 0.7},
-                                on_release=self.change_screen_to_edit_spending_screen,
+                                on_release=lambda obj: change_screen(
+                                    obj=obj, screen_name="edit_spending_screen"
+                                ),
                             ),
                             MDRectangleFlatIconButton(
                                 id=f"{ID}spending",
@@ -196,7 +205,9 @@ class MainScreen(MDScreen):
                                 icon="pencil",
                                 text="Edit",
                                 pos_hint={"top": 0.75, "right": 0.7},
-                                on_release=self.change_screen_to_edit_income_screen,
+                                on_release=lambda obj: change_screen(
+                                    obj=obj, screen_name="edit_income_screen"
+                                ),
                             ),
                             MDRectangleFlatIconButton(
                                 id=f"{ID}income",
@@ -253,9 +264,9 @@ class MainScreen(MDScreen):
         for ID in spending_income:
             if spending_income.get(ID)["type"] == "spending":
                 spending_date = spending_income.get(ID)["date"][5:7]
-                for key in self.spending_by_month.keys():
+                for key, val in self.spending_by_month.items():
                     if key == spending_date:
-                        month_amount = self.spending_by_month[key]
+                        month_amount = val 
                         self.spending_by_month[key] = -1 * (
                             month_amount + spending_income.get(ID)["amount"]
                         )
@@ -433,26 +444,26 @@ class MainScreen(MDScreen):
         spending_income.delete(ID)
         self.load_income_spending()
 
-    def change_screen_to_edit_spending_screen(self, instance=None):
-        btn = instance.id.strip("btn")
-        edit_screen = EditSpending()
-        edit_screen.save_ID_type(btn)
-        self.manager.current = "edit_spending_screen"
+    # def change_screen_to_edit_spending_screen(self, instance=None):
+    #     btn = instance.id.strip("btn")
+    #     edit_screen = EditSpending()
+    #     edit_screen.save_ID_type(btn)
+    #     self.manager.current = "edit_spending_screen"
 
-    def change_screen_to_edit_income_screen(self, instance=None):
-        btn = instance.id.strip("btn")
-        edit_income_screen = EditIncome()
-        edit_income_screen.save_ID_type(btn)
-        self.manager.current = "edit_income_screen"
+    # def change_screen_to_edit_income_screen(self, instance=None):
+    #     btn = instance.id.strip("btn")
+    #     edit_income_screen = EditIncome()
+    #     edit_income_screen.save_ID_type(btn)
+    #     self.manager.current = "edit_income_screen"
 
-    def change_screen_to_second(self, instance=None):
-        self.manager.current = "second"
+    # def change_screen_to_second(self, instance=None):
+    #     self.manager.current = "second"
 
-    def change_screen_to_settings_screen(self, instance=None):
-        self.manager.current = "settings_screen"
+    # def change_screen_to_settings_screen(self, instance=None):
+    #     self.manager.current = "settings_screen"
 
-    def change_screen_to_info_screen(self, instance=None):
-        self.manager.current = "info_screen"
+    # def change_screen_to_info_screen(self, instance=None):
+    #     self.manager.current = "info_screen"
 
-    def change_screen_to_app_theme_screen(self, instance=None):
-        self.manager.current = "app_theme_screen"
+    # def change_screen_to_app_theme_screen(self, instance=None):
+    #     self.manager.current = "app_theme_screen"
